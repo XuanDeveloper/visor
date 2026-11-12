@@ -1,0 +1,51 @@
+{
+  "name": "visor",
+  "version": "0.1.0",
+  "description": "Visor — painel de containers Docker remotos via SSH",
+  "main": "./out/main/index.js",
+  "author": "Juan",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "icons": "node scripts/make-icons.mjs",
+    "dev": "npm run icons && electron-vite dev",
+    "build": "npm run icons && tsc --noEmit -p tsconfig.node.json && tsc --noEmit -p tsconfig.web.json && electron-vite build",
+    "start": "electron-vite preview",
+    "dist": "npm run build && electron-builder --win"
+  },
+  "dependencies": {
+    "dockerode": "^4.0.9",
+    "electron-store": "^8.2.0",
+    "ssh2": "^1.17.0"
+  },
+  "devDependencies": {
+    "@fontsource/jetbrains-mono": "^5.2.8",
+    "@types/dockerode": "^3.3.47",
+    "@types/node": "^22.19.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.1",
+    "@types/ssh2": "^1.15.5",
+    "@vitejs/plugin-react": "^5.1.1",
+    "electron": "^34.5.8",
+    "electron-builder": "^25.1.8",
+    "electron-vite": "^4.0.1",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.4.1"
+  },
+  "build": {
+    "appId": "com.visor.app",
+    "productName": "Visor",
+    "files": ["out/**/*", "resources/**/*"],
+    "win": {
+      "target": ["nsis"],
+      "icon": "resources/icon.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}

@@ -1,0 +1,106 @@
+@import '@fontsource/jetbrains-mono/400.css';
+@import '@fontsource/jetbrains-mono/500.css';
+@import '@fontsource/jetbrains-mono/700.css';
+@import './tokens.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  margin: 0;
+  overflow: hidden;
+}
+
+/* No painel da bandeja a janela é transparente; o fundo é a casca .pop,
+   senão o retângulo opaco apareceria por trás dos cantos arredondados. */
+body.is-popover,
+body.is-popover #root {
+  background: transparent;
+}
+
+body {
+  background: var(--void);
+  color: var(--mist);
+  font-family: var(--mono);
+  font-size: var(--t-body);
+  font-feature-settings: 'tnum' 1, 'calt' 0;
+  -webkit-font-smoothing: antialiased;
+  user-select: none;
+  cursor: default;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+input {
+  font: inherit;
+  color: inherit;
+  background: none;
+  border: none;
+  outline: none;
+}
+
+/* Foco visível e consistente — nunca removido, só redesenhado. */
+:focus-visible {
+  outline: 2px solid var(--iris-bright);
+  outline-offset: 2px;
+  border-radius: var(--r-sm);
+}
+
+/* Barras de rolagem discretas, no tom das superfícies. */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--surface-4);
+  border: 3px solid var(--void);
+  border-radius: 999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--line-strong);
+}
+
+/* --- Utilitários tipográficos --- */
+
+.label {
+  font-size: var(--t-micro);
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--mist-faint);
+}
+
+.num {
+  font-variant-numeric: tabular-nums;
+}
+
+.prose {
+  font-family: var(--sans);
+  letter-spacing: 0;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

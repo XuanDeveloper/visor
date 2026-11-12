@@ -1,0 +1,195 @@
+/**
+ * Barra de título própria. Frameless: tudo aqui é região de arraste, exceto
+ * os controles, que precisam de -webkit-app-region: no-drag explícito.
+ */
+
+.titlebar {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--s3);
+  height: var(--titlebar-h);
+  padding-left: var(--s4);
+  background: var(--void);
+  border-bottom: 1px solid var(--line-soft);
+  -webkit-app-region: drag;
+}
+
+/* --- Marca --- */
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.brand__mark {
+  flex: none;
+}
+
+.brand__word {
+  font-size: var(--t-body);
+  font-weight: 700;
+  letter-spacing: 0.22em;
+  color: var(--mist-bright);
+}
+
+/* --- Pílula de conexão --- */
+
+.conn {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  padding: 5px var(--s3) 5px var(--s2);
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  -webkit-app-region: no-drag;
+  transition:
+    border-color var(--base) var(--ease),
+    background var(--base) var(--ease);
+}
+
+.conn:hover {
+  border-color: var(--line-strong);
+}
+
+.conn__beacon {
+  position: relative;
+  width: 7px;
+  height: 7px;
+  flex: none;
+  border-radius: 50%;
+  background: var(--state);
+}
+
+/* Anel que escapa do ponto enquanto a conexão está viva. */
+.conn__beacon::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border-radius: 50%;
+  border: 1px solid var(--state);
+  opacity: 0;
+}
+
+.conn--live .conn__beacon::after {
+  animation: beacon 3.2s var(--ease) infinite;
+}
+
+@keyframes beacon {
+  0% {
+    opacity: 0.5;
+    transform: scale(0.55);
+  }
+  60%,
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+.conn__host {
+  font-size: var(--t-small);
+  color: var(--mist);
+  white-space: nowrap;
+}
+
+.conn__lat {
+  font-size: var(--t-micro);
+  font-variant-numeric: tabular-nums;
+  color: var(--mist-faint);
+}
+
+/* --- Busca --- */
+
+.search {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  justify-self: end;
+  width: min(290px, 100%);
+  padding: 0 var(--s3);
+  height: 28px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--r-md);
+  color: var(--mist-faint);
+  -webkit-app-region: no-drag;
+  transition:
+    border-color var(--fast) var(--ease),
+    background var(--fast) var(--ease);
+}
+
+.search:focus-within {
+  border-color: var(--iris-line);
+  background: var(--surface-2);
+  color: var(--mist-dim);
+}
+
+.search input {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-body);
+  color: var(--mist);
+  user-select: text;
+}
+
+.search input::placeholder {
+  color: var(--mist-faint);
+}
+
+.search kbd {
+  font-family: var(--mono);
+  font-size: var(--t-micro);
+  color: var(--mist-faint);
+  padding: 1px 5px;
+  background: var(--surface-3);
+  border-radius: 3px;
+}
+
+/* --- Controles de janela --- */
+
+.wincontrols {
+  display: flex;
+  -webkit-app-region: no-drag;
+}
+
+.wincontrols button {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: var(--titlebar-h);
+  color: var(--mist-dim);
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+
+.wincontrols button:hover {
+  background: var(--surface-2);
+  color: var(--mist-bright);
+}
+
+.wincontrols button:last-child:hover {
+  background: var(--fail);
+  color: var(--void);
+}
+
+.iconbtn {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--r-sm);
+  color: var(--mist-dim);
+  -webkit-app-region: no-drag;
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+
+.iconbtn:hover {
+  background: var(--surface-2);
+  color: var(--mist-bright);
+}

@@ -1,0 +1,167 @@
+/**
+ * Coluna de contexto. Não repete a lista — responde outra pergunta:
+ * "como está o servidor como um todo, agora?"
+ */
+
+.side {
+  display: flex;
+  flex-direction: column;
+  width: var(--sidebar-w);
+  flex: none;
+  background: var(--void);
+  border-right: 1px solid var(--line-soft);
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.side__block {
+  padding: var(--s5) var(--s4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.side__block:last-child {
+  border-bottom: none;
+  flex: 1;
+}
+
+.side__title {
+  margin-bottom: var(--s4);
+}
+
+/* --- Constelação: um ponto por container --- */
+
+.constel {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-bottom: var(--s5);
+}
+
+.constel__dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 2.5px;
+  background: var(--state);
+  transition:
+    transform var(--fast) var(--ease),
+    box-shadow var(--fast) var(--ease);
+}
+
+/* Parados ficam vazados: presentes no mapa, mas sem peso visual. */
+.constel__dot[data-state='stopped'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--idle);
+}
+
+.constel__dot[data-state='failed'] {
+  box-shadow: 0 0 0 3px var(--fail-soft);
+}
+
+.constel__dot:hover {
+  transform: scale(1.45);
+  box-shadow: 0 0 0 3px var(--state-soft);
+}
+
+/* --- Legenda de contagens --- */
+
+.tallies {
+  display: flex;
+  flex-direction: column;
+  gap: var(--s2);
+}
+
+.tally {
+  display: grid;
+  grid-template-columns: 7px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s2);
+}
+
+.tally__pip {
+  width: 7px;
+  height: 7px;
+  border-radius: 2px;
+  background: var(--state);
+}
+
+.tally__word {
+  font-size: var(--t-small);
+  color: var(--mist-dim);
+}
+
+.tally__count {
+  font-size: var(--t-body);
+  font-variant-numeric: tabular-nums;
+  color: var(--mist-bright);
+}
+
+/* --- Host --- */
+
+.host__name {
+  font-size: var(--t-name);
+  font-weight: 500;
+  color: var(--mist-bright);
+  margin-bottom: var(--s1);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.host__line {
+  font-size: var(--t-small);
+  color: var(--mist-faint);
+  line-height: 1.7;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* --- Navegação de stacks --- */
+
+.navlist {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+
+.navitem {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s2);
+  width: 100%;
+  padding: 7px var(--s2);
+  border-radius: var(--r-sm);
+  text-align: left;
+  transition: background var(--fast) var(--ease);
+}
+
+.navitem:hover {
+  background: var(--surface);
+}
+
+.navitem__pip {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--state);
+}
+
+.navitem__name {
+  font-size: var(--t-body);
+  color: var(--mist-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: color var(--fast) var(--ease);
+}
+
+.navitem:hover .navitem__name {
+  color: var(--mist-bright);
+}
+
+.navitem__count {
+  font-size: var(--t-small);
+  font-variant-numeric: tabular-nums;
+  color: var(--mist-faint);
+}

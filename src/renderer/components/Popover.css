@@ -1,0 +1,702 @@
+/**
+ * O painel da bandeja.
+ *
+ * Direção deliberada: isto é um **instrumento de rack**, não um card de
+ * dashboard. As consequências concretas, que é o que afasta do visual
+ * genérico de template:
+ *
+ *   · Ângulos retos em tudo que é interno. Só a casca tem raio — porque é a
+ *     borda física do aparelho. Nada de cards arredondados empilhados.
+ *   · Grade visível: separadores de 1px fazem o ritmo, não margens soltas.
+ *   · Faixa de lombada roxa à esquerda de cada grupo, como etiqueta de trilho.
+ *   · Índice numerado (01, 02…) — catalogado, não decorado.
+ *   · Contraste tipográfico brutal: placar em 30px/700 ao lado de rótulos de
+ *     9px com tracking largo.
+ *   · Densidade real: linhas de 26px. Cabem 11 stacks sem rolar.
+ */
+
+/* A janela é transparente; esta casca é o aparelho em si. */
+.pop {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  background: var(--void);
+  border: 1px solid var(--line-strong);
+  border-radius: 14px;
+  box-shadow:
+    0 24px 60px rgba(0, 0, 0, 0.6),
+    0 2px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  transform-origin: bottom center;
+}
+
+/* --- Entrada e saída ---
+   Sobe deslizando enquanto cresce de 96%: lê como "saiu da bandeja". */
+.pop--enter {
+  animation: pop-in var(--pop-in) var(--ease-out-expo) both;
+}
+
+.pop--exit {
+  animation: pop-out var(--pop-out) var(--ease-in-quick) both;
+}
+
+@keyframes pop-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.965);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes pop-out {
+  from {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: translateY(8px) scale(0.985);
+  }
+}
+
+/* Cada bloco entra em cascata atrás da casca — o painel "se monta". */
+.pop--enter .pop__head,
+.pop--enter .pop__score,
+.pop--enter .pop__list,
+.pop--enter .pop__foot {
+  animation: rise 320ms var(--ease-out-expo) both;
+}
+.pop--enter .pop__head {
+  animation-delay: 40ms;
+}
+.pop--enter .pop__score {
+  animation-delay: calc(40ms + var(--stagger));
+}
+.pop--enter .pop__list {
+  animation-delay: calc(40ms + var(--stagger) * 2);
+}
+.pop--enter .pop__foot {
+  animation-delay: calc(40ms + var(--stagger) * 3);
+}
+
+@keyframes rise {
+  from {
+    opacity: 0;
+    transform: translateY(7px);
+  }
+}
+
+/* --- Cabeçalho: faixa roxa sólida --- */
+
+.pop__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: var(--s2);
+  padding: 11px 12px;
+  background: linear-gradient(180deg, var(--iris-band), var(--iris-deep));
+  border-bottom: 1px solid var(--line-strong);
+  -webkit-app-region: drag;
+}
+
+.pop__brand {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  min-width: 0;
+}
+
+.pop__word {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  color: var(--mist-bright);
+}
+
+.pop__host {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-size: 12.5px;
+  color: #ddd5f5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pop__lat {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  color: #b9addd;
+}
+
+.pop__btn {
+  display: grid;
+  place-items: center;
+  width: 28px;
+  height: 28px;
+  color: #cfc5ea;
+  border-radius: 6px;
+  -webkit-app-region: no-drag;
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    transform var(--fast) var(--ease-spring);
+}
+
+.pop__btn:hover {
+  background: rgba(255, 255, 255, 0.09);
+  color: #fff;
+  transform: translateY(-1px);
+}
+
+.pop__btn:active {
+  transform: translateY(0) scale(0.94);
+}
+
+/* --- Placar: três números grandes em grade dura --- */
+
+.pop__score {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  /* 1px de gap sobre o fundo claro cria as divisórias, sem desenhar bordas. */
+  gap: 1px;
+  background: var(--line);
+  border-bottom: 1px solid var(--line-strong);
+}
+
+.score {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 10px 12px 11px;
+  background: var(--surface);
+  transition: background var(--fast) var(--ease);
+}
+
+.score:hover {
+  background: var(--surface-2);
+}
+
+.score__n {
+  font-size: 30px;
+  font-weight: 700;
+  line-height: 0.92;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.03em;
+  color: var(--state);
+  /* Troca de número desliza em vez de pular. */
+  transition: color var(--base) var(--ease);
+}
+
+.score__n--zero {
+  color: var(--mist-faint);
+}
+
+.score__k {
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: 0.13em;
+  text-transform: uppercase;
+  /* Mistura com o texto claro: fica legível sem competir com o número. */
+  color: color-mix(in srgb, var(--state) 72%, var(--mist-bright));
+}
+
+.score__k--zero {
+  color: var(--mist-dim);
+}
+
+/* --- Lista de stacks --- */
+
+.pop__list {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.pop__list::-webkit-scrollbar {
+  width: 8px;
+}
+.pop__list::-webkit-scrollbar-thumb {
+  background: var(--surface-4);
+  border: 2px solid var(--void);
+}
+
+/* A lombada: faixa sólida à esquerda que identifica o grupo. */
+.grp {
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.grp__head {
+  position: relative;
+  display: grid;
+  /* A coluna de pips é a que cede primeiro: o placar à direita nunca sai. */
+  grid-template-columns: 20px minmax(0, 1fr) minmax(0, auto) 38px;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 8px 10px 8px 12px;
+  text-align: left;
+  background: transparent;
+  transition: background var(--fast) var(--ease);
+}
+
+/* A faixa. Roxa quando o grupo está íntegro, cor do estado quando não. */
+.grp__head::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: var(--iris);
+  transition:
+    background var(--base) var(--ease),
+    width var(--fast) var(--ease);
+}
+
+.grp[data-worst='failed'] .grp__head::before,
+.grp[data-worst='degraded'] .grp__head::before,
+.grp[data-worst='transitioning'] .grp__head::before {
+  background: var(--state);
+}
+
+.grp__head:hover,
+.grp__head.is-cursor {
+  background: var(--surface);
+}
+
+.grp__head:hover::before,
+.grp__head.is-cursor::before {
+  width: 5px;
+}
+
+/* Índice: catalogado como equipamento, não enfeitado. */
+.grp__idx {
+  font-size: 10.5px;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.04em;
+  color: var(--mist-dim);
+}
+
+.grp__name {
+  font-size: 13.5px;
+  font-weight: 500;
+  color: var(--mist-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.grp__pips {
+  display: flex;
+  gap: 3px;
+  overflow: hidden;
+}
+
+.pip {
+  flex: none;
+  width: 5px;
+  height: 5px;
+  border-radius: 1px;
+  background: var(--state);
+}
+
+.pip[data-state='stopped'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1px var(--idle);
+}
+
+.grp__tally {
+  min-width: 34px;
+  font-size: 12.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--state);
+}
+
+.grp__tally span {
+  color: var(--mist-faint);
+}
+
+/* --- Serviços dentro de um grupo --- */
+
+.grp__body {
+  position: relative;
+  overflow: hidden;
+  background: var(--surface);
+  border-top: 1px solid var(--line-soft);
+  animation: unfold 260ms var(--ease-out-expo);
+}
+
+/* Continua a lombada do cabeçalho por todo o corpo, mais apagada: a coluna
+   de cor atravessa o grupo inteiro em vez de parar no título.
+   Fica em .grp__body (sem data-state próprio) para herdar o --state do grupo,
+   não o de cada serviço — senão viraria uma lombada listrada. */
+.grp__body::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  width: 3px;
+  background: color-mix(in srgb, var(--state) 45%, transparent);
+}
+
+.grp[data-worst='up'] .grp__body::before,
+.grp[data-worst='stopped'] .grp__body::before {
+  background: color-mix(in srgb, var(--iris) 60%, transparent);
+}
+
+@keyframes unfold {
+  from {
+    /* grid-template-rows anima de verdade; max-height dá curva torta. */
+    opacity: 0;
+    transform: translateY(-5px);
+  }
+}
+
+.svc {
+  position: relative;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  width: 100%;
+  min-height: 30px;
+  transition: background var(--fast) var(--ease);
+}
+
+/* O corpo clicável: abre o detalhe. As ações ficam fora dele, senão
+   reiniciar exigiria mirar entre dois alvos aninhados. */
+.svc__main {
+  display: grid;
+  grid-template-columns: 14px minmax(0, 1fr) minmax(0, auto) 50px;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  padding: 4px 4px 4px 18px;
+  text-align: left;
+}
+
+.svc:hover,
+.svc.is-cursor {
+  background: var(--surface-2);
+}
+
+/* Cursor de teclado: barra à direita, para não disputar com a lombada. */
+.svc.is-cursor::after,
+.grp__head.is-cursor::after {
+  content: '';
+  position: absolute;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  background: var(--iris-bright);
+}
+
+.svc__dot {
+  justify-self: center;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--state);
+  transition: transform var(--fast) var(--ease-spring);
+}
+
+.svc:hover .svc__dot,
+.svc.is-cursor .svc__dot {
+  transform: scale(1.4);
+}
+
+.svc__dot[data-state='stopped'] {
+  background: transparent;
+  box-shadow: inset 0 0 0 1.5px var(--idle);
+}
+
+.svc__name {
+  font-size: 12.5px;
+  color: var(--mist-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.svc__note {
+  font-size: 11.5px;
+  color: var(--state);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.svc__num {
+  font-size: 11.5px;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--mist-dim);
+}
+
+/* --- Rodapé --- */
+
+.pop__foot {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s2);
+  padding: 7px 10px;
+  background: var(--surface);
+  border-top: 1px solid var(--line-strong);
+}
+
+.pop__beacon {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--state);
+  margin-left: 2px;
+}
+
+.pop__meta {
+  font-size: 11.5px;
+  color: var(--mist-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.pop__foot .pop__btn {
+  width: 26px;
+  height: 26px;
+  color: var(--mist-dim);
+}
+
+.pop__foot .pop__btn:hover {
+  background: var(--surface-3);
+  color: var(--mist-bright);
+}
+
+/* --- Estado sem conexão --- */
+
+.pop__gate {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: var(--s3);
+  padding: var(--s6);
+  text-align: center;
+}
+
+.pop__gate-title {
+  font-size: var(--t-name);
+  color: var(--mist-bright);
+}
+
+.pop__gate-text {
+  font-size: var(--t-small);
+  line-height: 1.65;
+  color: var(--mist-dim);
+}
+
+
+/* ---------- Ações inline ---------- */
+
+/*
+ * Aparecem no hover e no cursor de teclado, mas o espaço fica sempre
+ * reservado: se a linha mudasse de largura ao passar o mouse, a coluna de
+ * números dançaria e a leitura se perderia.
+ */
+.svc__acts {
+  display: flex;
+  gap: 1px;
+  padding-right: 8px;
+  opacity: 0;
+  transform: translateX(3px);
+  transition:
+    opacity var(--fast) var(--ease),
+    transform var(--fast) var(--ease);
+}
+
+.svc:hover .svc__acts,
+.svc.is-cursor .svc__acts,
+.svc__acts:focus-within {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.svc__act {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  color: var(--mist-dim);
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    transform var(--fast) var(--ease-spring);
+}
+
+.svc__act:hover {
+  background: var(--surface-4);
+  color: var(--mist-bright);
+  transform: translateY(-1px);
+}
+
+.svc__act:active {
+  transform: translateY(0) scale(0.92);
+}
+
+.svc__act--danger:hover {
+  color: var(--fail);
+  background: var(--fail-soft);
+}
+
+.svc__act--go:hover {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.svc__act:disabled {
+  cursor: default;
+  transform: none;
+}
+
+.svc__act.is-busy {
+  color: var(--iris-bright);
+  animation: act-pulse 900ms var(--ease) infinite;
+}
+
+@keyframes act-pulse {
+  50% {
+    opacity: 0.35;
+  }
+}
+
+/* ---------- Busca por digitação ---------- */
+
+.pop__query {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+  align-items: center;
+  gap: 7px;
+  padding: 6px 8px 6px 12px;
+  background: var(--iris-deep);
+  border-bottom: 1px solid var(--line-strong);
+  color: var(--iris-text);
+  animation: rise 200ms var(--ease-out-expo);
+}
+
+.pop__query-term {
+  font-size: 12px;
+  color: var(--mist-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Cursor piscando: deixa claro que a digitação está indo para a busca. */
+.pop__query-term::after {
+  content: '';
+  display: inline-block;
+  width: 1px;
+  height: 11px;
+  margin-left: 2px;
+  vertical-align: -1px;
+  background: var(--iris-text);
+  animation: caret 1.05s steps(1) infinite;
+}
+
+@keyframes caret {
+  50% {
+    opacity: 0;
+  }
+}
+
+.pop__query-hits {
+  font-size: 10.5px;
+  color: var(--mist-dim);
+  white-space: nowrap;
+}
+
+.pop__query-clear {
+  display: grid;
+  place-items: center;
+  width: 20px;
+  height: 20px;
+  border-radius: 4px;
+  color: var(--mist-dim);
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease);
+}
+
+.pop__query-clear:hover {
+  background: rgba(255, 255, 255, 0.1);
+  color: var(--mist-bright);
+}
+
+.pop__none {
+  padding: var(--s8) var(--s4);
+  text-align: center;
+  font-size: 11.5px;
+  color: var(--mist-dim);
+}
+
+/* ---------- Rodapé ---------- */
+
+/* Mensagem de ação entra com um realce curto e volta ao tom normal. */
+.pop__meta--flash {
+  color: var(--iris-text);
+  animation: flash-in 240ms var(--ease-out-expo);
+}
+
+@keyframes flash-in {
+  from {
+    opacity: 0;
+    transform: translateY(3px);
+  }
+}
+
+.pop__keys {
+  display: flex;
+  gap: 3px;
+}
+
+.pop__keys kbd {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  line-height: 1;
+  padding: 3px 4px;
+  color: var(--mist-dim);
+  background: var(--surface-3);
+  border-radius: 3px;
+}
+
+.pop__foot {
+  grid-template-columns: auto minmax(0, 1fr) auto auto;
+}
+
+/* ---------- Borda de rolagem ---------- */
+
+/*
+ * Sombra interna no topo e na base da lista: sinaliza que há mais conteúdo
+ * sem ocupar altura, que é o recurso escasso em um painel.
+ */
+.pop__list {
+  background:
+    linear-gradient(var(--void) 30%, rgba(15, 13, 22, 0)) top / 100% 14px no-repeat,
+    linear-gradient(rgba(15, 13, 22, 0), var(--void) 70%) bottom / 100% 14px no-repeat,
+    radial-gradient(farthest-side at 50% 0, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)) top / 100% 7px no-repeat,
+    radial-gradient(farthest-side at 50% 100%, rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0)) bottom / 100% 7px no-repeat;
+  background-attachment: local, local, scroll, scroll;
+}

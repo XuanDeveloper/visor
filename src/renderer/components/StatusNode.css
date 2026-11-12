@@ -1,0 +1,89 @@
+/**
+ * O nó é a unidade atômica da linguagem visual do Visor.
+ * Cada estado tem forma própria além da cor — quem não distingue verde de
+ * âmbar ainda lê preenchido vs. vazado vs. tracejado vs. cruz.
+ */
+
+.node {
+  display: block;
+  flex: none;
+  overflow: visible;
+}
+
+.node__core {
+  fill: var(--state);
+  transition: fill var(--base) var(--ease);
+}
+
+.node__ring {
+  fill: none;
+  stroke: var(--state);
+  stroke-width: 1.5;
+}
+
+/* up: o anel respira devagar, sinal de vida sem chamar atenção */
+.node__ring--breathe {
+  transform-origin: center;
+  animation: node-breathe 3.6s var(--ease) infinite;
+}
+
+@keyframes node-breathe {
+  0% {
+    opacity: 0.42;
+    transform: scale(0.72);
+  }
+  55% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+}
+
+/* degraded: anel tracejado parado — "está de pé, mas não confie".
+   Traços curtos e próximos: espaçados demais o anel lia como raios de sol. */
+.node__ring--dashed {
+  stroke-dasharray: 2 2.4;
+  opacity: 0.9;
+}
+
+/* transitioning: arco girando. O arco precisa cobrir ~⅓ da volta; mais
+   curto que isso lê como uma vírgula parada em vez de movimento. */
+.node__ring--spin {
+  stroke-dasharray: 16 26;
+  stroke-linecap: round;
+  transform-origin: center;
+  animation: node-spin 1.1s linear infinite;
+}
+
+@keyframes node-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* stopped: só o contorno */
+.node__hollow {
+  fill: var(--void);
+  stroke: var(--state);
+  stroke-width: 1.5;
+}
+
+.node__cross {
+  stroke: var(--void);
+  stroke-width: 1.8;
+  stroke-linecap: round;
+}
+
+/* O halo cresce no hover da linha inteira, reforçando o alvo de clique. */
+.node__halo {
+  fill: var(--state);
+  opacity: 0;
+  transform-origin: center;
+  transform: scale(0.6);
+  transition:
+    opacity var(--base) var(--ease),
+    transform var(--base) var(--ease);
+}

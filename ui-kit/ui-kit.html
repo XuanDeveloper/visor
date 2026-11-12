@@ -1,0 +1,960 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<title>Visor — UI Kit</title>
+<style>
+/* ===================================================================
+   UI Kit do Visor.
+
+   Os componentes abaixo não são imagens: são os mesmos tokens e as
+   mesmas regras do app, renderizados aqui. Se a paleta mudar no
+   src/renderer/styles/tokens.css, estes valores precisam acompanhar.
+   =================================================================== */
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('fonts/jetbrains-mono-latin-400-normal.woff2') format('woff2');
+  font-weight: 400; font-display: block;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('fonts/jetbrains-mono-latin-500-normal.woff2') format('woff2');
+  font-weight: 500; font-display: block;
+}
+@font-face {
+  font-family: 'JetBrains Mono';
+  src: url('fonts/jetbrains-mono-latin-700-normal.woff2') format('woff2');
+  font-weight: 700; font-display: block;
+}
+
+@page { size: A4 landscape; margin: 0; }
+
+:root {
+  --void: #0f0d16;
+  --surface: #17141f;
+  --surface-2: #1e1a2b;
+  --surface-3: #272036;
+  --surface-4: #332a45;
+  --iris-deep: #241c3a;
+  --iris-band: #2e2449;
+  --line: #262034;
+  --line-soft: #1d1829;
+  --line-strong: #3a3151;
+  --rail: #4e4270;
+  --mist: #bfc0d1;
+  --mist-bright: #e6e7f0;
+  --mist-dim: #9b9db5;
+  --mist-faint: #85879f;
+  --iris: #60519b;
+  --iris-bright: #8f7fe0;
+  --iris-text: #b3a6f2;
+  --iris-soft: rgba(143,127,224,.14);
+  --ok: #3ddc97;
+  --warn: #f2b53c;
+  --fail: #ff5c7a;
+  --idle: #5a5c70;
+  --mono: 'JetBrains Mono','Cascadia Mono',Consolas,ui-monospace,monospace;
+}
+
+[data-state='up']      { --state: var(--ok);          --state-soft: rgba(61,220,151,.12) }
+[data-state='degraded']{ --state: var(--warn);        --state-soft: rgba(242,181,60,.12) }
+[data-state='transitioning'] { --state: var(--iris-bright); --state-soft: rgba(143,127,224,.14) }
+[data-state='stopped'] { --state: var(--idle);        --state-soft: rgba(90,92,112,.14) }
+[data-state='failed']  { --state: var(--fail);        --state-soft: rgba(255,92,122,.12) }
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: var(--mono);
+  background: var(--void);
+  color: var(--mist);
+  -webkit-print-color-adjust: exact;
+  print-color-adjust: exact;
+}
+
+.page {
+  position: relative;
+  width: 297mm;
+  height: 210mm;
+  padding: 14mm 16mm;
+  background: var(--void);
+  page-break-after: always;
+  overflow: hidden;
+}
+.page:last-child { page-break-after: auto; }
+
+/* Numeração e fio superior — a mesma linguagem de "instrumento catalogado"
+   que a interface usa nos grupos. */
+.page::before {
+  content: '';
+  position: absolute;
+  left: 0; right: 0; top: 0;
+  height: 3px;
+  background: linear-gradient(90deg, var(--iris) 0%, var(--iris-bright) 40%, transparent 85%);
+}
+.folio {
+  position: absolute;
+  right: 16mm; bottom: 9mm;
+  font-size: 8pt;
+  letter-spacing: .14em;
+  color: var(--mist-faint);
+}
+.folio b { color: var(--mist-dim); font-weight: 500; }
+
+h1 { font-size: 30pt; font-weight: 700; letter-spacing: -.02em; color: var(--mist-bright); line-height: 1.04; }
+h2 { font-size: 15pt; font-weight: 500; letter-spacing: -.01em; color: var(--mist-bright); margin-bottom: 2mm; }
+h3 { font-size: 9pt; font-weight: 500; color: var(--mist-bright); margin-bottom: 1.5mm; }
+
+.eyebrow {
+  font-size: 7.5pt;
+  font-weight: 600;
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--iris-text);
+  margin-bottom: 3mm;
+}
+.lede { font-size: 10pt; line-height: 1.65; color: var(--mist-dim); max-width: 165mm; }
+p { font-size: 8.5pt; line-height: 1.6; color: var(--mist-dim); }
+p + p { margin-top: 2mm; }
+b, strong { color: var(--mist-bright); font-weight: 500; }
+code { color: var(--iris-text); }
+
+.rule { height: 1px; background: var(--line); margin: 5mm 0; }
+.cols { display: grid; gap: 7mm; }
+.c2 { grid-template-columns: 1fr 1fr; }
+.c3 { grid-template-columns: repeat(3, 1fr); }
+.c12 { grid-template-columns: 1fr 2fr; }
+.c21 { grid-template-columns: 2fr 1fr; }
+
+/* ---------- capa ---------- */
+.cover { display: flex; flex-direction: column; justify-content: center; height: 100%; }
+.cover-mark { display: flex; align-items: center; gap: 5mm; margin-bottom: 8mm; }
+.cover-meta {
+  display: flex; gap: 10mm; margin-top: 10mm;
+  font-size: 8pt; color: var(--mist-faint);
+}
+.cover-meta div b { display: block; color: var(--mist-bright); font-weight: 500; margin-bottom: 1mm; }
+
+/* ---------- swatches ---------- */
+.swatches { display: grid; grid-template-columns: repeat(5, 1fr); gap: 3mm; }
+.sw { border: 1px solid var(--line); }
+.sw__chip { height: 24mm; border-bottom: 1px solid var(--line); }
+.sw__body { padding: 2mm 2.5mm; }
+.sw__name { font-size: 7.5pt; color: var(--mist-bright); }
+.sw__hex { font-size: 7pt; color: var(--mist-faint); letter-spacing: .04em; }
+.sw__use { font-size: 6.5pt; color: var(--mist-faint); margin-top: .8mm; line-height: 1.35; }
+
+/* ---------- tipografia ---------- */
+.type-row { display: grid; grid-template-columns: 26mm 1fr; align-items: baseline; gap: 4mm; padding: 2mm 0; border-bottom: 1px solid var(--line-soft); }
+.type-spec { font-size: 7pt; color: var(--mist-faint); letter-spacing: .06em; }
+
+/* ---------- componentes ---------- */
+.specimen {
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 4mm;
+}
+.specimen--void { background: var(--void); }
+.specimen__label {
+  font-size: 6.5pt; letter-spacing: .16em; text-transform: uppercase;
+  color: var(--mist-faint); margin-bottom: 3mm;
+}
+.note { font-size: 7pt; color: var(--mist-faint); line-height: 1.5; margin-top: 2.5mm; }
+
+/* nós de estado */
+.nodes { display: grid; grid-template-columns: repeat(5, 1fr); gap: 2mm; text-align: center; }
+.node-cell { padding: 3mm 1mm; border: 1px solid var(--line-soft); background: var(--surface); }
+.node-name { font-size: 7.5pt; color: var(--state); margin-top: 2mm; }
+.node-desc { font-size: 6.5pt; color: var(--mist-faint); margin-top: 1mm; line-height: 1.4; }
+
+/* linha de serviço do painel */
+.svc-demo { position: relative; display: grid; grid-template-columns: 14px 1fr auto 50px; align-items: center; gap: 8px; min-height: 30px; padding: 4px 10px 4px 18px; background: var(--surface); }
+.svc-demo::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: color-mix(in srgb, var(--state) 45%, transparent); }
+.svc-dot { justify-self:center; width:6px; height:6px; border-radius:50%; background: var(--state); }
+.svc-dot[data-state='stopped'] { background: transparent; box-shadow: inset 0 0 0 1.5px var(--idle); }
+.svc-name { font-size: 9pt; color: var(--mist-bright); }
+.svc-note { font-size: 8pt; color: var(--state); }
+.svc-num { font-size: 8pt; text-align: right; color: var(--mist-dim); }
+
+/* cabeçalho de grupo */
+.grp-demo { position: relative; display: grid; grid-template-columns: 20px 1fr auto 38px; align-items: center; gap: 8px; padding: 8px 10px 8px 12px; background: var(--void); }
+.grp-demo::before { content:''; position:absolute; left:0; top:0; bottom:0; width:3px; background: var(--iris); }
+.grp-demo[data-state='failed']::before, .grp-demo[data-state='degraded']::before { background: var(--state); }
+.grp-idx { font-size: 7.5pt; color: var(--mist-dim); }
+.grp-name { font-size: 9.5pt; color: var(--mist-bright); }
+.grp-pips { display: flex; gap: 3px; }
+.pip { width: 5px; height: 5px; border-radius: 1px; background: var(--state); }
+.grp-tally { font-size: 9pt; text-align: right; color: var(--state); }
+.grp-tally span { color: var(--mist-faint); }
+
+/* placar */
+.score-demo { display: grid; grid-template-columns: repeat(3,1fr); gap: 1px; background: var(--line); border: 1px solid var(--line-strong); }
+.score-cell { padding: 3mm 3.5mm; background: var(--surface); }
+.score-n { font-size: 21pt; font-weight: 700; line-height: .92; letter-spacing: -.03em; color: var(--state); }
+.score-k { font-size: 7pt; font-weight: 600; letter-spacing: .13em; text-transform: uppercase; color: color-mix(in srgb, var(--state) 72%, var(--mist-bright)); margin-top: 1mm; }
+
+/* pílulas e botões */
+.pill { display:inline-block; padding: 2px 6px; font-size: 8pt; border-radius: 4px; }
+.pill--port { color: var(--iris-text); background: var(--iris-soft); }
+.pill--plain { color: var(--mist-dim); background: var(--surface-3); }
+.btn-demo { display:inline-flex; align-items:center; gap:6px; padding: 7px 12px; font-size: 8pt; border-radius: 8px; background: var(--surface-3); color: var(--mist); }
+.btn-demo--primary { color: var(--ok); background: rgba(61,220,151,.12); }
+.btn-demo--danger { color: var(--fail); background: rgba(255,92,122,.12); }
+
+/* toggle */
+.tg { display:inline-grid; grid-template-columns: 34px 1fr; align-items:center; gap: 3mm; }
+.tg-track { position: relative; width:34px; height:19px; border-radius:999px; background: var(--surface-4); }
+.tg-track::after { content:''; position:absolute; top:3px; left:3px; width:13px; height:13px; border-radius:50%; background: var(--mist-faint); }
+.tg-track--on { background: var(--iris); }
+.tg-track--on::after { left: 18px; background: var(--mist-bright); }
+
+/* ---------- wireframes ---------- */
+.wire { background: #121019; border: 1px solid var(--line); padding: 4mm; }
+.wf { border: 1px solid #35304a; background: #171423; }
+.wf-bar { padding: 2mm 2.5mm; border-bottom: 1px solid #35304a; font-size: 7pt; color: var(--mist-faint); letter-spacing: .1em; }
+.wf-bar--accent { background: #221b36; color: var(--iris-text); }
+.wf-box { border: 1px dashed #3d3656; margin: 2mm; padding: 2.5mm; font-size: 7pt; color: var(--mist-faint); }
+.wf-row { display: grid; grid-template-columns: 4mm 1fr auto; gap: 2mm; align-items: center; padding: 1.5mm 2.5mm; border-bottom: 1px solid #231e33; font-size: 7pt; color: var(--mist-faint); }
+.wf-tick { width: 3mm; height: 3mm; border: 1px solid #4b4268; border-radius: 50%; }
+.wf-spine { width: 2px; background: #4b4268; }
+.callout { display: grid; grid-template-columns: 5mm 1fr; gap: 2mm; font-size: 7pt; color: var(--mist-faint); line-height: 1.5; margin-top: 2mm; }
+.callout b { color: var(--iris-text); font-weight: 500; }
+
+/* ---------- telas ---------- */
+.shot { border: 1px solid var(--line-strong); display: block; width: 100%; }
+.shot--pop { width: auto; height: 142mm; border-radius: 10px; }
+.cap { font-size: 7pt; color: var(--mist-faint); margin-top: 2mm; line-height: 1.5; }
+.cap b { color: var(--mist-bright); font-weight: 500; }
+
+/* ---------- motion ---------- */
+.motion-row { display: grid; grid-template-columns: 34mm 30mm 1fr; gap: 4mm; align-items: center; padding: 2.5mm 0; border-bottom: 1px solid var(--line-soft); font-size: 8pt; }
+.motion-row b { color: var(--mist-bright); font-weight: 500; }
+.motion-row code { font-size: 7.5pt; }
+.curve { border: 1px solid var(--line); background: var(--surface); }
+
+/* ---------- tabela ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 8pt; }
+th { text-align: left; font-weight: 500; font-size: 6.5pt; letter-spacing: .16em; text-transform: uppercase; color: var(--mist-faint); padding: 2mm 2mm 2mm 0; border-bottom: 1px solid var(--line-strong); }
+td { padding: 2mm 2mm 2mm 0; border-bottom: 1px solid var(--line-soft); color: var(--mist-dim); vertical-align: top; }
+td b { color: var(--mist-bright); }
+</style>
+</head>
+<body>
+
+<!-- =============== 1. CAPA =============== -->
+<section class="page">
+  <div class="cover">
+    <div class="cover-mark">
+      <svg width="34" height="46" viewBox="0 0 14 18">
+        <path d="M7 3.5v11" stroke="#60519b" stroke-width="1.5"/>
+        <circle cx="7" cy="3.5" r="2.3" fill="#8f7fe0"/>
+        <circle cx="7" cy="9" r="2.7" fill="#3ddc97"/>
+        <circle cx="7" cy="14.5" r="2.3" fill="#8f7fe0"/>
+      </svg>
+      <div>
+        <div class="eyebrow" style="margin-bottom:1mm">Design System · v0.2</div>
+        <h1>VISOR</h1>
+      </div>
+    </div>
+
+    <p class="lede">
+      Painel de bandeja para acompanhar os containers Docker de um servidor
+      remoto, direto do Windows. O ícone na bandeja <b>é</b> o app: clicou,
+      abriu ali. A janela completa existe só quando você pede logs e detalhe.
+    </p>
+
+    <div class="cover-meta">
+      <div><b>Direção</b>Instrumento de rack</div>
+      <div><b>Operação</b>Teclado completo</div>
+      <div><b>Tipografia</b>JetBrains Mono</div>
+      <div><b>Base</b>#1e202c · #60519b · #31323e · #bfc0d1</div>
+      <div><b>Superfícies</b>2 — painel 416×672 · janela 1180×760</div>
+      <div><b>Contraste mínimo</b>5.16:1 medido em execução</div>
+    </div>
+  </div>
+  <div class="folio"><b>VISOR</b> · UI KIT</div>
+</section>
+
+<!-- =============== 2. DIREÇÃO =============== -->
+<section class="page">
+  <div class="eyebrow">01 — Direção de design</div>
+  <h2>Instrumento de rack, não card de dashboard</h2>
+  <p class="lede" style="margin-bottom:6mm">
+    A interface se comporta como um aparelho de medição: densa, catalogada,
+    silenciosa. Cor saturada aparece <b>só</b> quando carrega significado de
+    estado — nunca como decoração.
+  </p>
+
+  <div class="cols c2">
+    <div>
+      <h3>As cinco regras que seguram a direção</h3>
+      <table>
+        <tr><td style="width:30mm"><b>Ângulos retos</b></td><td>Só a casca externa tem raio, porque é a borda física do aparelho. Nada de cards arredondados empilhados.</td></tr>
+        <tr><td><b>Grade visível</b></td><td>Separadores de 1px fazem o ritmo. Não se usa margem solta para criar hierarquia.</td></tr>
+        <tr><td><b>Lombada</b></td><td>Faixa de cor à esquerda de cada grupo, como etiqueta de trilho. Roxa quando íntegro, cor do defeito quando não.</td></tr>
+        <tr><td><b>Índice</b></td><td>Grupos numerados 01, 02… — catalogado, não enfeitado.</td></tr>
+        <tr><td><b>Contraste tipográfico</b></td><td>Placar em 30px/700 ao lado de rótulos de 10,5px com tracking largo. Sem pesos intermediários.</td></tr>
+      </table>
+    </div>
+
+    <div>
+      <h3>O que foi recusado de propósito</h3>
+      <table>
+        <tr><td style="width:34mm"><b>Grade de cards</b></td><td>Vira um mural sem hierarquia. Aqui a lista é uma coluna única com lombadas.</td></tr>
+        <tr><td><b>Gradiente colorido</b></td><td>Só existe um gradiente, no cabeçalho, e entre dois tons do mesmo roxo.</td></tr>
+        <tr><td><b>Ícones de biblioteca</b></td><td>Conjunto fechado desenhado à mão, 16px, stroke 1.5. Peso visual uniforme.</td></tr>
+        <tr><td><b>Sombra em tudo</b></td><td>Uma única sombra, na casca do painel, porque ele flutua de verdade sobre o desktop.</td></tr>
+        <tr><td><b>Cor por decoração</b></td><td>Se um elemento é colorido, a cor significa um estado. Caso contrário é grafite.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <p style="font-size:8pt">
+    <b>Herança das referências.</b> A paleta violeta e o rail vertical com nós
+    vêm das três referências de partida; a tipografia monoespaçada como face
+    dominante vem do espécime <i>Inky Mono</i>. O que não foi copiado é a
+    estrutura: a timeline virou o eixo de leitura de uma stack do Compose.
+  </p>
+  <div class="folio"><b>01</b> · DIREÇÃO</div>
+</section>
+
+<!-- =============== 3. COR =============== -->
+<section class="page">
+  <div class="eyebrow">02 — Cor</div>
+  <h2>Superfícies violeta, estado saturado</h2>
+  <p class="lede" style="margin-bottom:5mm">
+    As superfícies foram deslocadas para o matiz do acento: o roxo deixa de ser
+    um detalhe e tinge o ambiente. Os quatro valores de estado são as únicas
+    cores saturadas da interface.
+  </p>
+
+  <h3 style="margin-top:4mm">Superfícies e linhas</h3>
+  <div class="swatches" style="margin-bottom:5mm">
+    <div class="sw"><div class="sw__chip" style="background:#0f0d16"></div><div class="sw__body"><div class="sw__name">void</div><div class="sw__hex">#0f0d16</div><div class="sw__use">Fundo do app e da lista</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#17141f"></div><div class="sw__body"><div class="sw__name">surface</div><div class="sw__hex">#17141f</div><div class="sw__use">Grupos, placar, rodapé</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#1e1a2b"></div><div class="sw__body"><div class="sw__name">surface-2</div><div class="sw__hex">#1e1a2b</div><div class="sw__use">Hover e seleção</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#2e2449"></div><div class="sw__body"><div class="sw__name">iris-band</div><div class="sw__hex">#2e2449</div><div class="sw__use">Cabeçalho do painel</div></div></div>
+    <div class="sw"><div class="sw__chip" style="background:#3a3151"></div><div class="sw__body"><div class="sw__name">line-strong</div><div class="sw__hex">#3a3151</div><div class="sw__use">Bordas estruturais</div></div></div>
+  </div>
+
+  <div class="cols c2">
+    <div>
+      <h3>Estado — as únicas cores saturadas</h3>
+      <div class="swatches" style="grid-template-columns:repeat(4,1fr)">
+        <div class="sw"><div class="sw__chip" style="background:#3ddc97;height:16mm"></div><div class="sw__body"><div class="sw__name">ok</div><div class="sw__hex">#3ddc97</div><div class="sw__use">no ar</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#f2b53c;height:16mm"></div><div class="sw__body"><div class="sw__name">warn</div><div class="sw__hex">#f2b53c</div><div class="sw__use">degradado</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#ff5c7a;height:16mm"></div><div class="sw__body"><div class="sw__name">fail</div><div class="sw__hex">#ff5c7a</div><div class="sw__use">falhou</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#5a5c70;height:16mm"></div><div class="sw__body"><div class="sw__name">idle</div><div class="sw__hex">#5a5c70</div><div class="sw__use">parado</div></div></div>
+      </div>
+    </div>
+    <div>
+      <h3>Acento e texto</h3>
+      <div class="swatches" style="grid-template-columns:repeat(4,1fr)">
+        <div class="sw"><div class="sw__chip" style="background:#60519b;height:16mm"></div><div class="sw__body"><div class="sw__name">iris</div><div class="sw__hex">#60519b</div><div class="sw__use">lombada, toggle</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#b3a6f2;height:16mm"></div><div class="sw__body"><div class="sw__name">iris-text</div><div class="sw__hex">#b3a6f2</div><div class="sw__use">sobre iris-soft</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#e6e7f0;height:16mm"></div><div class="sw__body"><div class="sw__name">mist-bright</div><div class="sw__hex">#e6e7f0</div><div class="sw__use">nomes, títulos</div></div></div>
+        <div class="sw"><div class="sw__chip" style="background:#9b9db5;height:16mm"></div><div class="sw__body"><div class="sw__name">mist-dim</div><div class="sw__hex">#9b9db5</div><div class="sw__use">números, apoio</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <p style="font-size:8pt">
+    <b>Regra de herança.</b> Um <code>data-state</code> no elemento pai define
+    <code>--state</code> e <code>--state-soft</code>; os filhos só consomem
+    essas duas variáveis. Nenhum componente conhece a paleta, então trocar um
+    valor de estado reverbera por toda a interface sem busca e substituição.
+  </p>
+  <div class="folio"><b>02</b> · COR</div>
+</section>
+
+<!-- =============== 4. TIPOGRAFIA E GRADE =============== -->
+<section class="page">
+  <div class="eyebrow">03 — Tipografia e grade</div>
+  <h2>Uma família, contraste por tamanho e peso</h2>
+
+  <div class="cols c21" style="margin-top:5mm">
+    <div>
+      <h3>Escala</h3>
+      <div class="type-row"><span class="type-spec">30px / 700 / −3%</span><span style="font-size:19pt;font-weight:700;letter-spacing:-.03em;color:var(--mist-bright)">22</span></div>
+      <div class="type-row"><span class="type-spec">15px / 500</span><span style="font-size:11pt;color:var(--mist-bright)">monitoring</span></div>
+      <div class="type-row"><span class="type-spec">13,5px / 500</span><span style="font-size:10pt;color:var(--mist-bright)">paperless</span></div>
+      <div class="type-row"><span class="type-spec">12,5px / 400</span><span style="font-size:9pt;color:var(--mist-bright)">prometheus</span></div>
+      <div class="type-row"><span class="type-spec">11,5px / 400 / tnum</span><span style="font-size:8.5pt;color:var(--mist-dim)">0.7%&nbsp;&nbsp;&nbsp;180 MB</span></div>
+      <div class="type-row"><span class="type-spec">10,5px / 600 / +13%</span><span style="font-size:7.5pt;font-weight:600;letter-spacing:.13em;text-transform:uppercase;color:#6cdfb0">no ar</span></div>
+      <div class="type-row"><span class="type-spec">10,5px / 400 / tnum</span><span style="font-size:7.5pt;color:var(--mist-dim)">01</span></div>
+
+      <p class="note" style="margin-top:3mm">
+        <b style="color:var(--mist-bright)">Números sempre tabulares.</b>
+        <code>font-variant-numeric: tabular-nums</code> em toda métrica: sem
+        isso, as colunas de CPU e memória dançam a cada atualização e o olho
+        perde a referência.
+      </p>
+    </div>
+
+    <div>
+      <h3>Por que monoespaçada em tudo</h3>
+      <p>
+        A tela é quase inteira composta de identificadores técnicos — nomes de
+        container, tags de imagem, portas, percentuais. Uma face monoespaçada
+        alinha esses dados naturalmente e dá a identidade de terminal que a
+        referência tipográfica pedia.
+      </p>
+      <p>
+        A face de texto (Inter) é reservada a frases corridas: estados vazios,
+        mensagens de erro e dicas. Representa menos de 5% do texto na tela.
+      </p>
+
+      <h3 style="margin-top:5mm">Grade de 4px</h3>
+      <p>
+        Espaçamentos saem de uma escala fixa: 4, 8, 12, 16, 20, 24, 32, 40.
+        Raios: 4, 8, 12, 16 — e 14px só na casca do painel.
+      </p>
+      <div style="display:flex;gap:2mm;align-items:flex-end;margin-top:3mm">
+        <div style="width:4px;height:4px;background:var(--iris-bright)"></div>
+        <div style="width:8px;height:8px;background:var(--iris-bright)"></div>
+        <div style="width:12px;height:12px;background:var(--iris-bright)"></div>
+        <div style="width:16px;height:16px;background:var(--iris-bright)"></div>
+        <div style="width:20px;height:20px;background:var(--iris)"></div>
+        <div style="width:24px;height:24px;background:var(--iris)"></div>
+        <div style="width:32px;height:32px;background:var(--iris)"></div>
+        <div style="width:40px;height:40px;background:var(--iris-deep)"></div>
+      </div>
+
+      <h3 style="margin-top:5mm">Alturas de linha</h3>
+      <table style="margin-top:1mm">
+        <tr><td style="width:40mm"><b>Serviço no painel</b></td><td>30px</td></tr>
+        <tr><td><b>Grupo no painel</b></td><td>36px</td></tr>
+        <tr><td><b>Container na janela</b></td><td>50px (duas linhas de texto)</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="folio"><b>03</b> · TIPOGRAFIA</div>
+</section>
+
+<!-- =============== 5. ESTADOS =============== -->
+<section class="page">
+  <div class="eyebrow">04 — Semântica de estado</div>
+  <h2>Forma antes de cor</h2>
+  <p class="lede" style="margin-bottom:5mm">
+    Os sete estados do Docker colapsam em cinco intenções visuais. Cada uma tem
+    <b>forma própria</b> além da cor, para que a leitura não dependa de
+    distinguir verde de âmbar.
+  </p>
+
+  <div class="nodes">
+    <div class="node-cell" data-state="up">
+      <svg width="30" height="30" viewBox="0 0 22 22"><circle cx="11" cy="11" r="7" fill="none" stroke="var(--ok)" stroke-width="1.5" opacity=".42"/><circle cx="11" cy="11" r="4" fill="var(--ok)"/></svg>
+      <div class="node-name">no ar</div>
+      <div class="node-desc">Preenchido, anel respirando devagar</div>
+    </div>
+    <div class="node-cell" data-state="degraded">
+      <svg width="30" height="30" viewBox="0 0 22 22"><circle cx="11" cy="11" r="7" fill="none" stroke="var(--warn)" stroke-width="1.5" stroke-dasharray="2 2.4"/><circle cx="11" cy="11" r="3.6" fill="var(--warn)"/></svg>
+      <div class="node-name">degradado</div>
+      <div class="node-desc">Anel tracejado e parado</div>
+    </div>
+    <div class="node-cell" data-state="transitioning">
+      <svg width="30" height="30" viewBox="0 0 22 22"><circle cx="11" cy="11" r="6.6" fill="none" stroke="var(--iris-bright)" stroke-width="1.5" stroke-dasharray="16 26" stroke-linecap="round"/><circle cx="11" cy="11" r="2.6" fill="var(--iris-bright)"/></svg>
+      <div class="node-name">em transição</div>
+      <div class="node-desc">Arco girando</div>
+    </div>
+    <div class="node-cell" data-state="stopped">
+      <svg width="30" height="30" viewBox="0 0 22 22"><circle cx="11" cy="11" r="4.4" fill="var(--void)" stroke="var(--idle)" stroke-width="1.5"/></svg>
+      <div class="node-name">parado</div>
+      <div class="node-desc">Vazado, sem peso visual</div>
+    </div>
+    <div class="node-cell" data-state="failed">
+      <svg width="30" height="30" viewBox="0 0 22 22"><circle cx="11" cy="11" r="6" fill="var(--fail)"/><path d="M8.6 8.6 L13.4 13.4 M13.4 8.6 L8.6 13.4" stroke="var(--void)" stroke-width="1.8" stroke-linecap="round"/></svg>
+      <div class="node-name">falhou</div>
+      <div class="node-desc">Cruz dentro do disco</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+
+  <div class="cols c2">
+    <div>
+      <h3>Mapeamento do Docker</h3>
+      <table>
+        <tr><th>Docker</th><th>Visor</th><th>Por quê</th></tr>
+        <tr><td><code>running</code> + healthy</td><td><b>no ar</b></td><td>—</td></tr>
+        <tr><td><code>running</code> + unhealthy</td><td><b>degradado</b></td><td>De pé, mas não confie</td></tr>
+        <tr><td><code>running</code> + starting</td><td><b>em transição</b></td><td>Ainda subindo</td></tr>
+        <tr><td><code>paused</code></td><td><b>degradado</b></td><td>Existe, não serve</td></tr>
+        <tr><td><code>restarting</code>, <code>created</code></td><td><b>em transição</b></td><td>Estado instável</td></tr>
+        <tr><td><code>exited (0)</code></td><td><b>parado</b></td><td>Init de compose que cumpriu o papel</td></tr>
+        <tr><td><code>exited (≠0)</code>, <code>dead</code></td><td><b>falhou</b></td><td>Exige ação</td></tr>
+      </table>
+    </div>
+    <div>
+      <h3>Gravidade × urgência</h3>
+      <p>
+        São duas escalas diferentes, e confundi-las já causou um defeito real:
+        uma stack ia para o topo da lista só porque tinha um container de
+        inicialização que terminou com <code>exit 0</code>.
+      </p>
+      <p>
+        <b>Gravidade</b> escolhe a cor do grupo — <code>parado</code> vem antes
+        de <code>no ar</code>. <b>Urgência</b> ordena a lista — ali
+        <code>parado</code> empata com <code>no ar</code>, porque um init que
+        terminou bem não é problema e não pode enterrar o que é.
+      </p>
+      <div class="specimen" style="margin-top:3mm">
+        <div class="specimen__label">Ordem na lista</div>
+        <div class="grp-demo" data-state="failed"><span class="grp-idx">01</span><span class="grp-name">monitoring</span><span class="grp-pips"><i class="pip" data-state="failed" style="background:var(--fail)"></i><i class="pip" style="background:var(--ok)"></i><i class="pip" style="background:var(--iris-bright)"></i></span><span class="grp-tally">1<span>/3</span></span></div>
+        <div class="grp-demo" data-state="degraded"><span class="grp-idx">02</span><span class="grp-name">nextcloud</span><span class="grp-pips"><i class="pip" style="background:var(--ok)"></i><i class="pip" style="background:var(--ok)"></i><i class="pip" style="background:var(--warn)"></i><i class="pip" style="background:var(--ok)"></i></span><span class="grp-tally">4<span>/4</span></span></div>
+        <div class="grp-demo" data-state="up"><span class="grp-idx">03</span><span class="grp-name">paperless</span><span class="grp-pips"><i class="pip" style="background:var(--ok)"></i><i class="pip" style="background:var(--ok)"></i><i class="pip" data-state="stopped" style="background:transparent;box-shadow:inset 0 0 0 1px var(--idle)"></i></span><span class="grp-tally" style="color:var(--mist-dim)">4<span>/5</span></span></div>
+      </div>
+    </div>
+  </div>
+  <div class="folio"><b>04</b> · ESTADOS</div>
+</section>
+
+<!-- =============== 6. COMPONENTES =============== -->
+<section class="page">
+  <div class="eyebrow">05 — Componentes</div>
+  <h2>Inventário</h2>
+
+  <div class="cols c3" style="margin-top:4mm">
+    <div class="specimen">
+      <div class="specimen__label">Placar</div>
+      <div class="score-demo">
+        <div class="score-cell" data-state="up"><div class="score-n">22</div><div class="score-k">no ar</div></div>
+        <div class="score-cell" data-state="degraded"><div class="score-n">3</div><div class="score-k">atenção</div></div>
+        <div class="score-cell" data-state="failed"><div class="score-n">3</div><div class="score-k">fora</div></div>
+      </div>
+      <p class="note">Rótulo herda a cor do estado — legível e carregando significado. Com contagem zero, volta ao cinza para não soar alarme falso.</p>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen__label">Grupo + lombada</div>
+      <div class="grp-demo" data-state="failed" style="background:var(--surface)"><span class="grp-idx">01</span><span class="grp-name">monitoring</span><span class="grp-pips"><i class="pip" style="background:var(--fail)"></i><i class="pip" style="background:var(--ok)"></i><i class="pip" style="background:var(--iris-bright)"></i></span><span class="grp-tally">1<span>/3</span></span></div>
+      <div class="svc-demo" data-state="failed"><i class="svc-dot" data-state="failed"></i><span class="svc-name">prometheus</span><span class="svc-note">exit 2</span><span class="svc-num"></span></div>
+      <div class="svc-demo" data-state="up"><i class="svc-dot"></i><span class="svc-name">grafana</span><span class="svc-num">0.7%</span><span class="svc-num">180 MB</span></div>
+      <p class="note">A lombada atravessa o grupo inteiro, não só o título: a coluna de cor não pode quebrar justamente onde o grupo está aberto.</p>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen__label">Pílulas e ações</div>
+      <div style="display:flex;gap:2mm;flex-wrap:wrap;align-items:center">
+        <span class="pill pill--port">:6162</span>
+        <span class="pill pill--port">:5440</span>
+        <span class="pill pill--plain">8080/tcp</span>
+      </div>
+      <div style="display:flex;gap:2mm;flex-wrap:wrap;margin-top:3mm">
+        <span class="btn-demo btn-demo--primary">Iniciar</span>
+        <span class="btn-demo btn-demo--danger">Parar</span>
+        <span class="btn-demo">Reiniciar</span>
+      </div>
+      <p class="note">Porta publicada usa <code>--iris-text</code>, não <code>--iris-bright</code>: sobre o próprio roxo translúcido o tom mais escuro ficava em 4,0:1.</p>
+    </div>
+  </div>
+
+  <div class="cols c3" style="margin-top:4mm">
+    <div class="specimen">
+      <div class="specimen__label">Rail (janela completa)</div>
+      <div style="display:grid;grid-template-columns:30px 1fr;gap:3mm;align-items:stretch;background:var(--surface);padding:2mm">
+        <div style="display:flex;flex-direction:column;align-items:center">
+          <div style="flex:1;width:2px;background:var(--fail);opacity:.62"></div>
+          <svg width="22" height="22" viewBox="0 0 22 22" style="background:var(--surface)"><circle cx="11" cy="11" r="6" fill="var(--fail)"/><path d="M8.6 8.6 L13.4 13.4 M13.4 8.6 L8.6 13.4" stroke="var(--surface)" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <div style="flex:1;width:2px;background:var(--rail)"></div>
+          <svg width="22" height="22" viewBox="0 0 22 22" style="background:var(--surface)"><circle cx="11" cy="11" r="4" fill="var(--ok)"/></svg>
+          <div style="flex:1;width:2px;background:var(--rail)"></div>
+        </div>
+        <div style="display:flex;flex-direction:column;justify-content:space-around">
+          <div><div style="font-size:9pt;color:var(--mist-bright)">prometheus</div><div style="font-size:7.5pt;color:var(--fail)">exit 2 · há 3h</div></div>
+          <div><div style="font-size:9pt;color:var(--mist-bright)">grafana</div><div style="font-size:7.5pt;color:var(--mist-faint)">no ar há 4d</div></div>
+        </div>
+      </div>
+      <p class="note">O eixo fica neutro quando tudo está no ar e acende na cor do defeito <b>exatamente</b> no trecho quebrado.</p>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen__label">Sparkline</div>
+      <div style="display:flex;gap:4mm;align-items:center;padding:2mm 0">
+        <svg width="80" height="26" viewBox="0 0 58 18" preserveAspectRatio="none">
+          <path d="M0,14 L7,11 L14,13 L21,6 L28,9 L35,4 L42,7 L49,3 L58,6 L58,18 L0,18 Z" fill="rgba(61,220,151,.12)"/>
+          <path d="M0,14 L7,11 L14,13 L21,6 L28,9 L35,4 L42,7 L49,3 L58,6" fill="none" stroke="var(--ok)" stroke-width="1.25" stroke-linejoin="round"/>
+        </svg>
+        <span style="font-size:8.5pt;color:var(--mist)">22.3%</span>
+      </div>
+      <div style="display:flex;gap:4mm;align-items:center;padding:2mm 0;border-top:1px solid var(--line-soft)">
+        <svg width="80" height="26" viewBox="0 0 58 18"><line x1="0" y1="17" x2="58" y2="17" stroke="var(--line-strong)" stroke-width="1"/></svg>
+        <span style="font-size:8.5pt;color:var(--mist)">0.1%</span>
+      </div>
+      <p class="note">Série essencialmente ociosa vira linha de base. Desenhar uma reta colorida sugeriria uma medição que não existe.</p>
+    </div>
+
+    <div class="specimen">
+      <div class="specimen__label">Interruptor e campo</div>
+      <div class="tg" style="margin-bottom:3mm"><span class="tg-track tg-track--on"></span><span style="font-size:8.5pt;color:var(--mist)">Subir com o Windows</span></div>
+      <div class="tg"><span class="tg-track"></span><span style="font-size:8.5pt;color:var(--mist)">Avisar ao recuperar</span></div>
+      <div style="margin-top:3mm;height:9mm;background:var(--surface-2);border:1px solid var(--line);border-radius:4px;display:flex;align-items:center;padding:0 3mm;font-size:8.5pt;color:var(--mist-bright)">192.168.0.10</div>
+      <p class="note">Desenhados do zero para manter o traço. Nenhuma biblioteca de componentes entra no projeto.</p>
+    </div>
+  </div>
+  <div class="folio"><b>05</b> · COMPONENTES</div>
+</section>
+
+<!-- =============== 7. WIREFRAMES =============== -->
+<section class="page">
+  <div class="eyebrow">06 — Wireframes</div>
+  <h2>Duas superfícies, um bundle</h2>
+  <p class="lede" style="margin-bottom:5mm">
+    O mesmo renderer é carregado com <code>?mode=popover</code> ou
+    <code>?mode=panel</code>. O painel é a forma principal; a janela existe
+    para o que não cabe em 416px.
+  </p>
+
+  <div class="cols" style="grid-template-columns:72mm 1fr">
+    <div class="wire">
+      <div class="specimen__label" style="margin-bottom:2mm">Painel · 416 × 672</div>
+      <div class="wf">
+        <div class="wf-bar wf-bar--accent">MARCA · HOST · ms &nbsp;&nbsp;&nbsp; ⬈ ✕</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:1px;background:#35304a">
+          <div class="wf-box" style="margin:0;border:0;background:#171423;text-align:center">22<br><span style="font-size:6pt">NO AR</span></div>
+          <div class="wf-box" style="margin:0;border:0;background:#171423;text-align:center">3<br><span style="font-size:6pt">ATENÇÃO</span></div>
+          <div class="wf-box" style="margin:0;border:0;background:#171423;text-align:center">3<br><span style="font-size:6pt">FORA</span></div>
+        </div>
+        <div style="display:flex">
+          <div class="wf-spine" style="background:var(--fail)"></div>
+          <div style="flex:1">
+            <div class="wf-row"><span>01</span><span>grupo com falha</span><span>1/3</span></div>
+            <div class="wf-row" style="padding-left:6mm"><span class="wf-tick"></span><span>serviço</span><span>exit 2</span></div>
+            <div class="wf-row" style="padding-left:6mm"><span class="wf-tick"></span><span>serviço</span><span>0.7%</span></div>
+          </div>
+        </div>
+        <div style="display:flex">
+          <div class="wf-spine"></div>
+          <div style="flex:1">
+            <div class="wf-row"><span>02</span><span>grupo íntegro</span><span>4/4</span></div>
+            <div class="wf-row"><span>03</span><span>grupo íntegro</span><span>3/3</span></div>
+            <div class="wf-row"><span>04</span><span>grupo íntegro</span><span>1/1</span></div>
+            <div class="wf-row"><span>05</span><span>…</span><span></span></div>
+          </div>
+        </div>
+        <div class="wf-bar">● docker 27.5.1 · 8 núcleos &nbsp;&nbsp; ⟳ ⚙</div>
+      </div>
+      <div class="callout"><b>A</b><span>Grupos com defeito abrem sozinhos; os íntegros ficam recolhidos. É o que você veio ver.</span></div>
+      <div class="callout"><b>B</b><span>Clique em qualquer serviço abre a janela já naquele container.</span></div>
+    </div>
+
+    <div class="wire">
+      <div class="specimen__label" style="margin-bottom:2mm">Janela completa · 1180 × 760</div>
+      <div class="wf">
+        <div class="wf-bar">MARCA · ⬤ CONEXÃO &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; BUSCA (Ctrl K) &nbsp;&nbsp;&nbsp; ⚙ — ▭ ✕</div>
+        <div style="display:grid;grid-template-columns:52mm 1fr;min-height:74mm">
+          <div style="border-right:1px solid #35304a">
+            <div class="wf-box">CONSTELAÇÃO<br><span style="font-size:6pt">um ponto por container, ordenado por gravidade</span></div>
+            <div class="wf-box">CONTAGENS<br><span style="font-size:6pt">falhou · degradado · no ar · parado</span></div>
+            <div class="wf-box">HOST<br><span style="font-size:6pt">docker · núcleos · RAM · imagens</span></div>
+            <div class="wf-box">ÍNDICE DE STACKS<br><span style="font-size:6pt">salta e expande</span></div>
+          </div>
+          <div style="position:relative">
+            <div class="wf-box" style="border-left:2px solid var(--fail)">
+              <b style="color:var(--mist-dim)">GRUPO</b> &nbsp; 1/3
+              <div style="display:flex;gap:2mm;margin-top:2mm">
+                <div class="wf-spine" style="background:var(--fail)"></div>
+                <div style="flex:1">
+                  <div class="wf-row" style="border:0"><span class="wf-tick"></span><span>nome + diagnóstico · imagem</span><span>:porta &nbsp; ▁▂▃ &nbsp; cpu &nbsp; mem &nbsp; ⏵⟳☰</span></div>
+                  <div class="wf-row" style="border:0"><span class="wf-tick"></span><span>nome + diagnóstico · imagem</span><span>:porta &nbsp; ▁▂▃ &nbsp; cpu &nbsp; mem</span></div>
+                </div>
+              </div>
+            </div>
+            <div class="wf-box" style="border-left:2px solid var(--rail)"><b style="color:var(--mist-dim)">GRUPO</b> &nbsp; 4/4 &nbsp; <span style="font-size:6pt">(recolhível, estado lembrado)</span></div>
+            <div style="position:absolute;right:2mm;top:2mm;bottom:2mm;width:40mm;border:1px dashed #4b4268;background:#1a1626;padding:2mm;font-size:6.5pt;color:var(--mist-faint)">
+              INSPETOR<br><br>
+              <span style="color:var(--mist-dim)">CPU · MEM · REDE</span><br>
+              <span style="font-size:6pt">sparklines ao vivo</span><br><br>
+              <span style="color:var(--mist-dim)">FICHA TÉCNICA</span><br>
+              <span style="font-size:6pt">imagem, portas, health, reinícios</span><br><br>
+              <span style="color:var(--mist-dim)">LOGS</span><br>
+              <span style="font-size:6pt">stream, filtro, stderr marcado</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="callout"><b>C</b><span>O inspetor entra por cima, sem reflow: a lista fica no lugar atrás dele, então voltar não custa reorientação.</span></div>
+      <div class="callout"><b>D</b><span>Durante uma busca todos os grupos abrem — esconder acertos seria hostil.</span></div>
+    </div>
+  </div>
+  <div class="folio"><b>06</b> · WIREFRAMES</div>
+</section>
+
+<!-- =============== 8. TELA: PAINEL =============== -->
+<section class="page">
+  <div class="eyebrow">07 — Telas · painel da bandeja</div>
+  <div class="cols" style="grid-template-columns:auto auto 1fr;align-items:start;margin-top:3mm">
+    <div>
+      <img class="shot shot--pop" src="../docs/panel.png" alt="Painel da bandeja" />
+      <div class="cap"><b>Estado padrão.</b> Grupos com defeito já abertos.</div>
+    </div>
+    <div>
+      <img class="shot shot--pop" src="../docs/panel-groups.png" alt="Painel com grupos abertos" />
+      <div class="cap"><b>Vários grupos abertos.</b> A lista rola; a lombada guia.</div>
+    </div>
+    <div>
+      <h3>Anatomia</h3>
+      <table>
+        <tr><td style="width:26mm"><b>Cabeçalho</b></td><td>Faixa roxa com a marca, host e latência. É a única região arrastável. À direita: expandir para janela e fechar.</td></tr>
+        <tr><td><b>Placar</b></td><td>Três números em grade dura de 1px. Agrupa por intenção — <i>no ar</i>, <i>atenção</i>, <i>fora</i> — e não por estado do Docker.</td></tr>
+        <tr><td><b>Lista</b></td><td>Um grupo por stack do Compose, numerado. Recolhido mostra os pips de saúde; aberto mostra serviço, carga e memória.</td></tr>
+        <tr><td><b>Rodapé</b></td><td>Farol de conexão, versão do daemon e recursos do host. Reconectar e ajustes.</td></tr>
+      </table>
+
+      <h3 style="margin-top:5mm">Comportamento</h3>
+      <table>
+        <tr><td style="width:26mm"><b>Abrir</b></td><td>Clique esquerdo no ícone da bandeja. O painel ancora acima do ícone, dentro da área útil do monitor.</td></tr>
+        <tr><td><b>Fechar</b></td><td>Clicar fora, <code>Esc</code>, ou clicar no ícone de novo.</td></tr>
+        <tr><td><b>Ícone oculto</b></td><td>Se o ícone estiver no flyout de ícones ocultos, <code>getBounds()</code> devolve zeros; o painel então ancora pelo cursor.</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="folio"><b>07</b> · PAINEL</div>
+</section>
+
+<!-- =============== 8b. INTERAÇÃO DO PAINEL =============== -->
+<section class="page">
+  <div class="eyebrow">07b — Interação do painel</div>
+  <h2>A mão nunca precisa sair do teclado</h2>
+
+  <div class="cols" style="grid-template-columns:auto auto 1fr;align-items:start;margin-top:3mm">
+    <div>
+      <img class="shot shot--pop" src="../docs/panel-actions.png" alt="Ações inline" style="height:112mm" />
+      <div class="cap"><b>Cursor e ações.</b> A seta desce, as ações aparecem.</div>
+    </div>
+    <div>
+      <img class="shot shot--pop" src="../docs/panel-search.png" alt="Busca por digitação" style="height:112mm" />
+      <div class="cap"><b>Busca.</b> Comece a digitar; não há campo fixo.</div>
+    </div>
+    <div>
+      <h3>Teclado</h3>
+      <table>
+        <tr><td style="width:26mm"><code>↑ ↓</code></td><td>Anda pela lista achatada: grupos e serviços na mesma sequência em que aparecem.</td></tr>
+        <tr><td><code>→ ←</code></td><td>Abre e fecha o grupo sob o cursor.</td></tr>
+        <tr><td><code>Enter</code></td><td>No grupo, alterna. No serviço, abre o detalhe na janela.</td></tr>
+        <tr><td><code>R</code></td><td>Reinicia o serviço sob o cursor.</td></tr>
+        <tr><td><code>S</code></td><td>Para, ou inicia se estiver parado.</td></tr>
+        <tr><td><code>a-z 0-9</code></td><td>Começa a filtrar.</td></tr>
+        <tr><td><code>Esc</code></td><td>Duas etapas: desfaz a busca, depois fecha.</td></tr>
+        <tr><td><code>Home End</code></td><td>Primeiro e último item.</td></tr>
+        <tr><td><code>Ctrl+Shift+D</code></td><td>Atalho global, de qualquer lugar do sistema.</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="rule" style="margin:4mm 0"></div>
+
+  <div class="cols c3">
+    <div>
+      <h3>Espaço reservado</h3>
+      <p>As ações surgem no hover, mas a largura fica sempre alocada. Se a linha mudasse de tamanho ao passar o mouse, a coluna de números dançaria e a leitura se perderia.</p>
+    </div>
+    <div>
+      <h3>Cursor à direita</h3>
+      <p>A barra do cursor de teclado fica na borda direita para não disputar leitura com a lombada do grupo, que já é uma faixa à esquerda.</p>
+    </div>
+    <div>
+      <h3>O placar não filtra</h3>
+      <p>Durante uma busca ele segue mostrando o servidor inteiro. Contar só os filtrados faria parecer que o host tem quatro containers quando você digita “postgres”. O número de acertos já está na barra de busca.</p>
+    </div>
+  </div>
+  <div class="folio"><b>07b</b> · INTERAÇÃO</div>
+</section>
+
+<!-- =============== 9. TELA: JANELA =============== -->
+<section class="page">
+  <div class="eyebrow">08 — Telas · janela completa</div>
+  <div class="cols c2" style="margin-top:3mm">
+    <div>
+      <img class="shot" src="../docs/window.png" alt="Lista por stack" />
+      <div class="cap"><b>Lista por stack.</b> O rail acende em vermelho na falha e em âmbar no serviço degradado — a localização do defeito é lida pela forma.</div>
+    </div>
+    <div>
+      <img class="shot" src="../docs/window-inspector.png" alt="Inspetor com logs" />
+      <div class="cap"><b>Inspetor.</b> Métricas com sparkline, ficha técnica e logs ao vivo; <code>stderr</code> ganha guia à esquerda e tom quente, sem virar vermelho berrante.</div>
+    </div>
+  </div>
+  <div class="cols c2" style="margin-top:4mm">
+    <div>
+      <img class="shot" src="../docs/window-collapsed.png" alt="Todas as stacks recolhidas" />
+      <div class="cap"><b>Tudo recolhido.</b> O servidor inteiro em uma tela — índice de 11 stacks com saúde em miniatura.</div>
+    </div>
+    <div>
+      <img class="shot" src="../docs/window-find.png" alt="Busca ativa" />
+      <div class="cap"><b>Busca.</b> Cobre nome, serviço, stack e imagem. Abre todos os grupos enquanto ativa.</div>
+    </div>
+  </div>
+  <div class="folio"><b>08</b> · JANELA</div>
+</section>
+
+<!-- =============== 10. AJUSTES E RESPONSIVO =============== -->
+<section class="page">
+  <div class="eyebrow">09 — Telas · ajustes e limites</div>
+  <div class="cols c2" style="margin-top:3mm">
+    <div>
+      <img class="shot" src="../docs/window-settings.png" alt="Configurações" />
+      <div class="cap"><b>Ajustes.</b> Três seções: servidor, segundo plano e avisos. Salvar reconfigura o túnel SSH — não há botão "testar" porque a pílula de conexão na barra de título já é o teste.</div>
+    </div>
+    <div>
+      <img class="shot" src="../docs/window-narrow.png" alt="Largura mínima" />
+      <div class="cap"><b>Largura mínima (880px).</b> Tudo trunca com elipse; nada estoura horizontalmente. A janela não permite menos que isso.</div>
+    </div>
+  </div>
+
+  <div class="rule"></div>
+  <div class="cols c3">
+    <div>
+      <h3>Avisos</h3>
+      <p>Notificação nativa só quando um container <b>cai</b>, fica <b>degradado</b> ou entra em <b>loop de reinício</b> (3+ em 5 minutos). Cooldown de 2 minutos por container e silêncio após reconectar — senão o retorno de uma queda de rede viraria avalanche.</p>
+    </div>
+    <div>
+      <h3>Segundo plano</h3>
+      <p>O app se registra para subir com o Windows e inicia direto na bandeja com <code>--hidden</code>. Fechar a janela esconde; só "Sair" no menu da bandeja encerra. O registro só vale no app instalado.</p>
+    </div>
+    <div>
+      <h3>Contraste verificado</h3>
+      <p>Medido <b>em execução</b>, não no preview: <code>scripts/check-contrast.mjs</code> lê as cores computadas pelo próprio Chromium, compondo fundos com alpha. Pior caso atual: <b>5,16:1</b>.</p>
+    </div>
+  </div>
+  <div class="folio"><b>09</b> · AJUSTES</div>
+</section>
+
+<!-- =============== 11. MOTION =============== -->
+<section class="page">
+  <div class="eyebrow">10 — Motion</div>
+  <h2>Entrada que decelera, saída que não faz esperar</h2>
+  <p class="lede" style="margin-bottom:5mm">
+    O painel sobe deslizando enquanto cresce de 96,5% — lê como "saiu da
+    bandeja". A saída é menos da metade da duração: ninguém quer esperar para
+    fechar algo.
+  </p>
+
+  <div class="cols c21">
+    <div>
+      <div class="motion-row" style="border-bottom:1px solid var(--line-strong)">
+        <b>Transição</b><b>Duração</b><b>Curva</b>
+      </div>
+      <div class="motion-row"><span>Painel entra</span><code>300ms</code><code>cubic-bezier(.16, 1, .3, 1)</code></div>
+      <div class="motion-row"><span>Painel sai</span><code>150ms</code><code>cubic-bezier(.4, 0, 1, 1)</code></div>
+      <div class="motion-row"><span>Blocos em cascata</span><code>320ms · 20ms</code><code>mesma curva da entrada</code></div>
+      <div class="motion-row"><span>Grupo abre</span><code>260ms</code><code>cubic-bezier(.16, 1, .3, 1)</code></div>
+      <div class="motion-row"><span>Hover / foco</span><code>140ms</code><code>cubic-bezier(.22, .61, .36, 1)</code></div>
+      <div class="motion-row"><span>Troca de estado</span><code>220ms</code><code>cubic-bezier(.22, .61, .36, 1)</code></div>
+      <div class="motion-row"><span>Botão pressionado</span><code>140ms</code><code>cubic-bezier(.34, 1.32, .64, 1)</code></div>
+      <div class="motion-row"><span>Nó "respirando"</span><code>3,6s · loop</code><code>anel some ao expandir</code></div>
+      <div class="motion-row"><span>Ações entram</span><code>140ms</code><code>opacidade + 3px lateral</code></div>
+      <div class="motion-row"><span>Barra de busca</span><code>200ms</code><code>cubic-bezier(.16, 1, .3, 1)</code></div>
+      <div class="motion-row"><span>Eco no rodapé</span><code>240ms</code><code>sobe 3px e assenta</code></div>
+      <div class="motion-row"><span>Cursor da busca</span><code>1,05s · loop</code><code>steps(1) — pisca, não desvanece</code></div>
+
+      <p class="note" style="margin-top:4mm">
+        <b style="color:var(--mist-bright)">A saída precisa de coordenação entre processos.</b>
+        O processo principal avisa o renderer, espera 160&nbsp;ms e só então
+        esconde a janela — <code>EXIT_MS</code> em <code>popover.ts</code> tem
+        de acompanhar <code>--pop-out</code> no CSS. Esconder antes faria a
+        animação ser cortada no meio.
+      </p>
+      <p class="note">
+        A janela do painel é <b style="color:var(--mist-bright)">transparente</b>.
+        Sem isso a animação aconteceria dentro de um retângulo opaco que já
+        apareceu instantaneamente — o pior dos dois mundos.
+      </p>
+    </div>
+
+    <div>
+      <h3>Curvas</h3>
+      <div class="curve" style="padding:3mm;margin-bottom:3mm">
+        <svg width="100%" height="110" viewBox="0 0 120 110">
+          <rect x="10" y="10" width="100" height="90" fill="none" stroke="var(--line)" stroke-width="1"/>
+          <path d="M10,100 C26,24 46,10 110,10" fill="none" stroke="var(--ok)" stroke-width="2"/>
+          <text x="14" y="22" fill="var(--ok)" font-size="7" font-family="monospace">entrada</text>
+        </svg>
+        <div style="font-size:7pt;color:var(--mist-faint)">Sai rápido da origem, assenta sem bater.</div>
+      </div>
+      <div class="curve" style="padding:3mm">
+        <svg width="100%" height="110" viewBox="0 0 120 110">
+          <rect x="10" y="10" width="100" height="90" fill="none" stroke="var(--line)" stroke-width="1"/>
+          <path d="M10,100 C50,100 86,60 110,10" fill="none" stroke="var(--fail)" stroke-width="2"/>
+          <text x="14" y="22" fill="var(--fail)" font-size="7" font-family="monospace">saída</text>
+        </svg>
+        <div style="font-size:7pt;color:var(--mist-faint)">Acelera e some. Curta de propósito.</div>
+      </div>
+
+      <h3 style="margin-top:5mm">Movimento reduzido</h3>
+      <p style="font-size:7.5pt">
+        <code>prefers-reduced-motion</code> zera toda animação e transição.
+        Nenhum estado da interface depende de movimento para ser compreendido —
+        o nó "respirando" é reforço, nunca o único sinal.
+      </p>
+    </div>
+  </div>
+  <div class="folio"><b>10</b> · MOTION</div>
+</section>
+
+<!-- =============== 12. ARQUITETURA =============== -->
+<section class="page">
+  <div class="eyebrow">11 — Arquitetura</div>
+  <h2>Como o pixel chega na tela</h2>
+
+  <div class="cols c2" style="margin-top:4mm">
+    <div>
+      <div class="specimen specimen--void">
+        <div class="specimen__label">Caminho dos dados</div>
+        <div style="font-size:8pt;line-height:2.1;color:var(--mist-dim)">
+          <div><span style="color:var(--iris-text)">servidor</span> &nbsp;/var/run/docker.sock</div>
+          <div style="color:var(--mist-faint);padding-left:4mm">↑ direct-streamlocal@openssh.com</div>
+          <div><span style="color:var(--iris-text)">ssh2</span> &nbsp;&nbsp;&nbsp;&nbsp;túnel autenticado por chave</div>
+          <div style="color:var(--mist-faint);padding-left:4mm">↑ net.Server em 127.0.0.1:porta efêmera</div>
+          <div><span style="color:var(--iris-text)">dockerode</span> Engine API completa</div>
+          <div style="color:var(--mist-faint);padding-left:4mm">↑ /events · /stats · /logs · /containers</div>
+          <div><span style="color:var(--iris-text)">main</span> &nbsp;&nbsp;&nbsp;&nbsp;snapshot + watcher + bandeja</div>
+          <div style="color:var(--mist-faint);padding-left:4mm">↑ contextBridge tipado</div>
+          <div><span style="color:var(--iris-text)">renderer</span> &nbsp;painel · janela</div>
+        </div>
+      </div>
+
+      <p class="note" style="margin-top:3mm">
+        <b style="color:var(--mist-bright)">Por que o túnel e não o CLI.</b>
+        Encaminhar o socket Unix dá a Engine API inteira, com os streams de
+        <code>/events</code> — a UI reage a mudanças na hora, sem esperar o
+        próximo poll. Nada disso existiria parseando a saída do
+        <code>docker&nbsp;ps</code>. Zero porta exposta, zero daemon
+        reconfigurado.
+      </p>
+    </div>
+
+    <div>
+      <h3>Arquivos</h3>
+      <table>
+        <tr><td style="width:40mm"><code>shared/types.ts</code></td><td>Contrato único entre os três processos</td></tr>
+        <tr><td><code>main/tunnel.ts</code></td><td>SSH → endpoint TCP local, com backoff de 1s a 30s</td></tr>
+        <tr><td><code>main/docker.ts</code></td><td>Lista, stats, logs, eventos, agrupamento</td></tr>
+        <tr><td><code>main/popover.ts</code></td><td>Painel ancorado: posição, foco, animação de saída</td></tr>
+        <tr><td><code>main/watcher.ts</code></td><td>Compara snapshots e decide o que merece interromper</td></tr>
+        <tr><td><code>renderer/components/</code></td><td>Painel, janela, inspetor, ajustes</td></tr>
+        <tr><td><code>styles/tokens.css</code></td><td>Fonte única de cor, tipo, espaço e motion</td></tr>
+      </table>
+
+      <h3 style="margin-top:5mm">Duas armadilhas do Windows</h3>
+      <table>
+        <tr><td style="width:40mm"><b>blur → hide</b></td><td>Clicar no ícone não transfere foco, então o <code>blur</code> dispara logo após o <code>show</code> e o painel pisca e some. Resolvido com 420ms de carência.</td></tr>
+        <tr><td><b>toggle que nunca fecha</b></td><td>Clicar com o painel aberto dispara <code>blur</code> (esconde) e depois <code>click</code> (mostraria). Resolvido lembrando o instante da última ocultação.</td></tr>
+      </table>
+
+      <h3 style="margin-top:5mm">Verificação</h3>
+      <table>
+        <tr><td style="width:40mm"><code>probe.mjs</code></td><td>Confere o caminho SSH → Docker fora do Electron</td></tr>
+        <tr><td><code>shoot-ui.mjs</code></td><td>Captura em viewport exata via CDP</td></tr>
+        <tr><td><code>check-contrast.mjs</code></td><td>Mede contraste no app em execução</td></tr>
+        <tr><td><code>inspect-live.mjs</code></td><td>Lê o que a UI realmente renderizou</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="folio"><b>11</b> · ARQUITETURA</div>
+</section>
+
+</body>
+</html>

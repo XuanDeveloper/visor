@@ -1,0 +1,289 @@
+/**
+ * Gaveta de inspeção. Entra pela direita sobre a lista, sem reflow — a lista
+ * permanece no lugar atrás dela, então voltar não custa reorientação.
+ */
+
+.inspector {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  display: flex;
+  flex-direction: column;
+  width: min(560px, 62%);
+  background: var(--surface);
+  border-left: 1px solid var(--line-strong);
+  box-shadow: var(--shadow-drawer);
+  animation: drawer-in var(--base) var(--ease);
+  z-index: 20;
+}
+
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+}
+
+/* --- Cabeçalho --- */
+
+.insp__head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+
+.insp__title {
+  min-width: 0;
+}
+
+.insp__name {
+  font-size: var(--t-stack);
+  font-weight: 500;
+  color: var(--mist-bright);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.insp__sub {
+  margin-top: 2px;
+  font-size: var(--t-small);
+  color: var(--state);
+}
+
+/* --- Métricas --- */
+
+.gauges {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1px;
+  background: var(--line-soft);
+  border-bottom: 1px solid var(--line);
+}
+
+.gauge {
+  padding: var(--s3) var(--s4);
+  background: var(--surface);
+}
+
+.gauge__label {
+  margin-bottom: var(--s2);
+}
+
+.gauge__value {
+  font-size: var(--t-metric);
+  font-weight: 500;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  color: var(--mist-bright);
+}
+
+.gauge__unit {
+  font-size: var(--t-small);
+  color: var(--mist-faint);
+  margin-left: 3px;
+}
+
+.gauge__spark {
+  margin-top: var(--s2);
+}
+
+/* --- Ficha técnica --- */
+
+.facts {
+  padding: var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+
+.fact {
+  display: grid;
+  grid-template-columns: 96px minmax(0, 1fr);
+  gap: var(--s3);
+  padding: 3px 0;
+  font-size: var(--t-small);
+}
+
+.fact__key {
+  color: var(--mist-faint);
+}
+
+.fact__val {
+  color: var(--mist);
+  user-select: text;
+  overflow-wrap: anywhere;
+}
+
+/* --- Ações --- */
+
+.insp__actions {
+  display: flex;
+  gap: var(--s2);
+  padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line);
+}
+
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px var(--s3);
+  font-size: var(--t-small);
+  color: var(--mist);
+  background: var(--surface-3);
+  border: 1px solid transparent;
+  border-radius: var(--r-md);
+  transition:
+    background var(--fast) var(--ease),
+    color var(--fast) var(--ease),
+    border-color var(--fast) var(--ease);
+}
+
+.btn:hover {
+  background: var(--surface-4);
+  color: var(--mist-bright);
+}
+
+.btn--primary {
+  color: var(--ok);
+  background: var(--ok-soft);
+}
+
+.btn--primary:hover {
+  background: color-mix(in srgb, var(--ok) 22%, transparent);
+  color: var(--ok);
+}
+
+.btn--danger:hover {
+  background: var(--fail-soft);
+  color: var(--fail);
+}
+
+.btn:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+/* --- Logs --- */
+
+.logs {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+.logs__bar {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--s3);
+  padding: var(--s2) var(--s4);
+  border-bottom: 1px solid var(--line-soft);
+}
+
+.logs__filter {
+  display: flex;
+  align-items: center;
+  gap: var(--s2);
+  height: 26px;
+  padding: 0 var(--s2);
+  background: var(--surface-2);
+  border: 1px solid var(--line);
+  border-radius: var(--r-sm);
+  color: var(--mist-faint);
+}
+
+.logs__filter:focus-within {
+  border-color: var(--iris-line);
+}
+
+.logs__filter input {
+  flex: 1;
+  min-width: 0;
+  font-size: var(--t-small);
+  color: var(--mist);
+  user-select: text;
+}
+
+.logs__stream {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--s2) 0 var(--s4);
+  background: var(--void);
+  scroll-behavior: smooth;
+}
+
+.logline {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: var(--s3);
+  padding: 1px var(--s4);
+  font-size: var(--t-small);
+  line-height: 1.55;
+  user-select: text;
+}
+
+.logline:hover {
+  background: var(--surface);
+}
+
+.logline__time {
+  color: var(--mist-faint);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.logline__text {
+  color: var(--mist);
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+/* stderr não vira vermelho berrante — ganha uma guia à esquerda e tom quente. */
+.logline--err {
+  background: linear-gradient(to right, var(--fail-soft), transparent 55%);
+  box-shadow: inset 2px 0 0 var(--fail);
+}
+
+.logline--err .logline__text {
+  color: #ffc4ce;
+}
+
+.logline--hit .logline__text mark {
+  background: var(--iris-soft);
+  color: var(--iris-bright);
+  border-radius: 2px;
+  padding: 0 1px;
+}
+
+.logs__empty {
+  padding: var(--s8) var(--s4);
+  text-align: center;
+  font-size: var(--t-small);
+  color: var(--mist-faint);
+}
+
+/* Botão flutuante para voltar ao fim quando o usuário rolou para trás. */
+.logs__tail {
+  position: absolute;
+  right: var(--s5);
+  bottom: var(--s5);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px var(--s3);
+  font-size: var(--t-small);
+  color: var(--void);
+  background: var(--iris-bright);
+  border-radius: 999px;
+  box-shadow: var(--shadow-pop);
+  animation: drawer-in var(--fast) var(--ease);
+}
+
+.logs__tail:hover {
+  background: #a493ea;
+}

@@ -1,0 +1,11 @@
+node_modules/
+out/
+dist/
+resources/*.png
+*.log
+
+# Material de divulgação: estratégia e rascunhos de post são seus, não do repo.
+LANCAMENTO.md
+
+# Imagens de post para redes sociais
+divulgacao/

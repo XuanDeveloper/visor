@@ -1,0 +1,131 @@
+/**
+ * Visor — tokens.
+ *
+ * Direção: painel de instrumentos silencioso. A interface inteira é grafite
+ * arroxeado; cor saturada aparece só quando carrega significado de estado.
+ * Os quatro valores base vêm da paleta de referência:
+ *   #1e202c (superfície) · #60519b (acento) · #31323e (elevação) · #bfc0d1 (texto)
+ */
+
+:root {
+  /* --- Superfícies ---
+     Deslocadas para o violeta: o #60519b da paleta deixa de ser um detalhe e
+     passa a tingir o ambiente inteiro. #1e1a2b é o #1e202c da referência
+     levado para o mesmo matiz do acento. */
+  --void: #0f0d16;
+  --surface: #17141f;
+  --surface-2: #1e1a2b;
+  --surface-3: #272036;
+  --surface-4: #332a45;
+
+  /* Roxo estrutural: cabeçalhos, faixas de grupo, seleção. */
+  --iris-deep: #241c3a;
+  --iris-band: #2e2449;
+
+  /* --- Linhas --- */
+  --line: #262034;
+  --line-soft: #1d1829;
+  --line-strong: #3a3151;
+  /* O rail precisa de mais presença que uma borda: é o eixo de leitura. */
+  --rail: #4e4270;
+
+  /* --- Texto --- */
+  --mist: #bfc0d1;
+  --mist-bright: #e6e7f0;
+  --mist-dim: #9b9db5;
+  --mist-faint: #85879f;
+
+  /* --- Acento: identidade, nunca estado --- */
+  --iris: #60519b;
+  --iris-bright: #8f7fe0;
+  --iris-soft: rgba(143, 127, 224, 0.14);
+  /* Tom claro para texto sobre --iris-soft: o --iris-bright não alcança 4.5:1
+     contra o próprio roxo translúcido. */
+  --iris-text: #b3a6f2;
+  --iris-line: rgba(143, 127, 224, 0.32);
+
+  /* --- Semântica de estado: o único lugar com cor saturada --- */
+  --ok: #3ddc97;
+  --ok-soft: rgba(61, 220, 151, 0.12);
+  --warn: #f2b53c;
+  --warn-soft: rgba(242, 181, 60, 0.12);
+  --fail: #ff5c7a;
+  --fail-soft: rgba(255, 92, 122, 0.12);
+  --idle: #5a5c70;
+  --idle-soft: rgba(90, 92, 112, 0.14);
+
+  /* --- Tipografia --- */
+  --mono: 'JetBrains Mono', 'Cascadia Mono', 'Consolas', ui-monospace, monospace;
+  --sans: 'Inter', 'Segoe UI Variable Text', 'Segoe UI', system-ui, sans-serif;
+
+  --t-micro: 10px;
+  --t-small: 11px;
+  --t-body: 12px;
+  --t-name: 13px;
+  --t-stack: 15px;
+  --t-metric: 22px;
+  --t-display: 34px;
+
+  /* --- Espaçamento: grade de 4px --- */
+  --s1: 4px;
+  --s2: 8px;
+  --s3: 12px;
+  --s4: 16px;
+  --s5: 20px;
+  --s6: 24px;
+  --s8: 32px;
+  --s10: 40px;
+
+  /* --- Raios --- */
+  --r-sm: 4px;
+  --r-md: 8px;
+  --r-lg: 12px;
+  --r-xl: 16px;
+
+  /* --- Cromagem --- */
+  --titlebar-h: 44px;
+  --sidebar-w: 236px;
+  --rail-x: 13px; /* centro do rail dentro da coluna de nós */
+
+  --shadow-drawer: -24px 0 64px rgba(0, 0, 0, 0.55);
+  --shadow-pop: 0 12px 32px rgba(0, 0, 0, 0.45);
+
+  --ease: cubic-bezier(0.22, 0.61, 0.36, 1);
+  --fast: 140ms;
+  --base: 220ms;
+
+  /* --- Motion ---
+     Entrada decelera forte: sai rápido da origem e assenta sem bater.
+     Saída é curta e acelerada — ninguém quer esperar para fechar. */
+  --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+  --ease-spring: cubic-bezier(0.34, 1.32, 0.64, 1);
+  --ease-in-quick: cubic-bezier(0.4, 0, 1, 1);
+  /* --pop-out precisa acompanhar EXIT_MS em src/main/popover.ts */
+  --pop-in: 300ms;
+  --pop-out: 150ms;
+  /* Atraso entre itens consecutivos na entrada em cascata. */
+  --stagger: 20ms;
+}
+
+/* Mapeia um estado do Visor para seu par cor/fundo. Um data-state no
+   elemento pai já resolve toda a cromagem dos filhos. */
+[data-state='up'] {
+  --state: var(--ok);
+  --state-soft: var(--ok-soft);
+}
+[data-state='degraded'] {
+  --state: var(--warn);
+  --state-soft: var(--warn-soft);
+}
+[data-state='transitioning'] {
+  --state: var(--iris-bright);
+  --state-soft: var(--iris-soft);
+}
+[data-state='stopped'] {
+  --state: var(--idle);
+  --state-soft: var(--idle-soft);
+}
+[data-state='failed'] {
+  --state: var(--fail);
+  --state-soft: var(--fail-soft);
+}
